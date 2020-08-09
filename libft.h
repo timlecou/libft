@@ -6,7 +6,7 @@
 /*   By: timlecou <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/15 15:23:34 by timlecou          #+#    #+#             */
-/*   Updated: 2020/05/11 14:32:50 by timlecou         ###   ########.fr       */
+/*   Updated: 2020/08/09 17:08:28 by timlecou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdarg.h>
+# define SUCCESS_CODE 1
+# define EOF_CODE 0
+# define ERROR_CODE -1
 
 void			*ft_memset(void *s, int c, size_t n);
 void			*ft_bzero(void *s, size_t n);
@@ -113,9 +116,9 @@ void			pf_ft_last_change(t_pf *pf);
 int				pf_ft_rigth_d2(t_pf *pf, intmax_t nb);
 int				pf_ft_left_d2(t_pf *pf, intmax_t nb);
 char			*pf_ft_itoa_d(int nb);
+char			*ft_strnew(int size);
 int				get_next_line(int fd, char **line);
-char			*ft_cut(char *str);
-char			*ft_cut_begin(char *str);
-int				is_nl(char *str);
-int				ft_len(char *str);
+char			*ft_strncat(char *dest, char *src, unsigned int nb);
+int				contains_char(char *s, char c);
+int				free_string_and_return(char **str, int return_value);
 #endif

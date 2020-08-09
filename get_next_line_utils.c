@@ -6,68 +6,58 @@
 /*   By: timlecou <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/15 19:24:25 by timlecou          #+#    #+#             */
-/*   Updated: 2020/05/11 14:36:14 by timlecou         ###   ########.fr       */
+/*   Updated: 2020/08/09 17:10:11 by timlecou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int		ft_len(char *str)
+int		contains_char(char *s, char c)
 {
-	int	i;
+	int	index;
 
-	i = 0;
-	if (!str)
+	index = 0;
+	if (!s)
 		return (0);
-	while (str[i] != '\0')
-		i++;
-	return (i);
+	while (s[index])
+	{
+		if (s[index] == c)
+			return (SUCCESS_CODE);
+		index++;
+	}
+	return (0);
 }
 
-char	*ft_cut_begin(char *str)
+char	*ft_strncat(char *dest, char *src, unsigned int nb)
 {
-	int		i;
-	int		j;
-	char	*tmp;
+	unsigned int	len;
+	unsigned int	index;
 
-	i = 0;
-	j = 0;
-	while (str[j] != '\n' && str[j] != '\0')
-		j++;
-	if (!str)
-		return (NULL);
-	if (!(tmp = malloc(sizeof(char) * j + 1)))
-		return (NULL);
-	while (str[i] != '\n' && str[i] != '\0')
-	{
-		tmp[i] = str[i];
-		i++;
-	}
-	tmp[i] = '\0';
-	return (tmp);
+	index = 0;
+	len = (int)ft_strlen(dest);
+	while (src[index] && index < nb)
+		dest[len++] = src[index++];
+	dest[len] = 0;
+	return (dest);
 }
 
-char	*ft_cut(char *str)
+char	*ft_strnew(int n)
 {
-	char	*res;
-	int		i;
-	int		j;
+	char	*string;
+	int		index;
 
-	i = 0;
-	j = 0;
-	if (!str)
+	if (!(string = (char *)malloc(n)))
 		return (NULL);
-	while (str[i] != '\n' && str[i] != '\0')
-		i++;
-	i++;
-	if (!(res = (char*)malloc(sizeof(char) * (ft_len(&str[i]) + 1))))
-		return (NULL);
-	while (str[i] != '\0')
-	{
-		res[j] = str[i];
-		i++;
-		j++;
-	}
-	res[j] = '\0';
-	return (res);
+	index = 0;
+	while (index < n)
+		string[index++] = 0;
+	return (string);
+}
+
+int		free_string_and_return(char **string, int val)
+{
+	if (*string)
+		free(*string);
+	*string = NULL;
+	return (val);
 }

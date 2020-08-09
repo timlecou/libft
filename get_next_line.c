@@ -6,92 +6,94 @@
 /*   By: timlecou <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/15 19:23:57 by timlecou          #+#    #+#             */
-/*   Updated: 2020/05/11 14:35:46 by timlecou         ###   ########.fr       */
+/*   Updated: 2020/08/09 17:09:00 by timlecou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #define BUFFER_SIZE 32
 
-int		is_nl(char *str)
+static int	join_line(int fd, char **string)
 {
-	int	i;
+	int		r;
+	char	*s;
+	char	*buffer;
 
-	i = 0;
-	if (!str)
-		return (0);
-	while (str[i] != '\0')
+	if (!(buffer = ft_strnew(BUFFER_SIZE + 1)))
+		return (ERROR_CODE);
+	if ((r = read(fd, buffer, BUFFER_SIZE)) <= 0)
 	{
-		if (str[i] == '\n')
-			return (1);
-		i++;
+		free(buffer);
+		return (r);
 	}
-	return (0);
+	buffer[r] = '\0';
+	if (!(s = ft_strnew((int)ft_strlen(*string) + (r + 1))))
+		return (ERROR_CODE);
+	if (*string)
+	{
+		s = ft_strncat(s, *string, (int)ft_strlen(*string));
+		free(*string);
+	}
+	*string = ft_strncat(s, buffer, r);
+	free(buffer);
+	if (!contains_char(*string, '\n'))
+		return (join_line(fd, string));
+	return (SUCCESS_CODE);
 }
 
-int		ft_all_cut(char **res, char **line, int ret)
+static int	get_only_string(char **line, char **string, int *index, int *index2)
 {
-	char	*ptr;
+	char	*tmp;
+	char	*s2;
+	char	*s;
 
-	ptr = NULL;
-	if (is_nl(*res))
+	while ((*string)[*index] && (*string)[*index] != '\n')
+		(*index) += -(*index - (*index + 1));
+	if (!(s = ft_strnew(*index + 1)))
+		return (ERROR_CODE);
+	*line = ft_strncat(s, *string, *index);
+	*index2 = (int)ft_strlen(*string) - *index;
+	if (!(*index2))
+		return (free_string_and_return(string, EOF_CODE));
+	if ((s2 = ft_strnew(*index2)))
 	{
-		*line = ft_cut_begin(*res);
-		ptr = *res;
-		*res = ft_cut(*res);
-		free(ptr);
+		tmp = ft_strncat(s2, *string + *index + 1, *index2 - 1);
+		free(*string);
+		*string = tmp;
+		return (SUCCESS_CODE);
 	}
-	else if (!is_nl(*res) && ret == 0)
-	{
-		*line = ft_strdup(*res);
-		free(*res);
-		*res = NULL;
-		return (0);
-	}
-	return (1);
+	return (free_string_and_return(string, ERROR_CODE));
 }
 
-int		ft_ret(char **res, int fd)
+static int	get_line_from_str(char **string, char **line)
 {
-	int		ret;
-	char	tmp[BUFFER_SIZE + 1];
-	char	*ptr;
+	int	index;
+	int	index2;
+	int	r;
 
-	ret = 0;
-	ptr = NULL;
-	while (!is_nl(*res) && (ret = read(fd, tmp, BUFFER_SIZE)) != 0)
-	{
-		if (ret == -1)
-			return (-1);
-		tmp[ret] = '\0';
-		ptr = *res;
-		*res = ft_strjoin(*res, tmp);
-		free(ptr);
-	}
-	return (ret);
+	index = 0;
+	index2 = 0;
+	r = 0;
+	if ((r = get_only_string(line, string, &index, &index2)) != 1)
+		return (free_string_and_return(string, 0));
+	return (SUCCESS_CODE);
 }
 
-int		get_next_line(int fd, char **line)
+int			get_next_line(int fd, char **line)
 {
-	static char	*res[1024];
-	int			ret;
-	char		*ptr;
+	static char	*string = NULL;
 
-	ptr = NULL;
-	if (BUFFER_SIZE <= 0 || fd < 0 || !line)
-		return (-1);
-	ret = ft_ret(&res[fd], fd);
-	if (ret == -1)
-		return (-1);
-	if (res[fd])
+	if (fd < 0 || !line || BUFFER_SIZE <= 0)
+		return (ERROR_CODE);
+	if (!contains_char(string, '\n'))
 	{
-		if (ft_all_cut(&res[fd], line, ret) == 0)
-			return (0);
+		if (join_line(fd, &string) == ERROR_CODE)
+			return (free_string_and_return(&string, ERROR_CODE));
+		if (!string)
+		{
+			*line = ft_strnew(1);
+			return (EOF_CODE);
+		}
 	}
-	else
-	{
-		*line = ft_strdup("");
-		return (0);
-	}
-	return (1);
+	return (get_line_from_str(&string, line));
 }
